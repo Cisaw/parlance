@@ -17,6 +17,15 @@ public interface StandardParser<A, B> extends Parser<A, Failures, B> {
     @Override
     Either<Failures, B> parse(A a);
 
+    default StandardParser<A, B> or(ParserT<Identity<?>, A, Failures, B> other) {
+        return or(other, (x, y) -> Failures.nested("Expected one of the following to pass", x.append(y)));
+    }
+
+    @Override
+    default <C> StandardParser<A, C> biMapR(Fn1<? super B, ? extends C> fn) {
+        return standardParser(Parser.super.biMapR(fn));
+    }
+
     @Override
     default <C> StandardParser<Tuple2<C, A>, Tuple2<C, B>> cartesian() {
         return standardParser(Parser.super.cartesian());

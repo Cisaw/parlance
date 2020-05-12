@@ -26,6 +26,22 @@ public interface Parser<A, F, B> extends ParserT<Identity<?>, A, F, B> {
     }
 
     @Override
+    default <F2, C> Parser<A, F2, C> biMap(Fn1<? super F, ? extends F2> lFn,
+                                           Fn1<? super B, ? extends C> rFn) {
+        return parser(ParserT.super.biMap(lFn, rFn));
+    }
+
+    @Override
+    default <F2> Parser<A, F2, B> biMapL(Fn1<? super F, ? extends F2> fn) {
+        return parser(ParserT.super.biMapL(fn));
+    }
+
+    @Override
+    default <C> Parser<A, F, C> biMapR(Fn1<? super B, ? extends C> fn) {
+        return parser(ParserT.super.biMapR(fn));
+    }
+
+    @Override
     default <C> Parser<Tuple2<C, A>, F, Tuple2<C, B>> cartesian() {
         return parser(ParserT.super.cartesian());
     }

@@ -6,6 +6,7 @@ import com.jnape.palatable.lambda.functions.Fn1;
 import com.jnape.palatable.lambda.functions.Fn2;
 import com.jnape.palatable.lambda.functions.recursion.RecursiveResult;
 import com.jnape.palatable.lambda.functor.Applicative;
+import com.jnape.palatable.lambda.functor.Bifunctor;
 import com.jnape.palatable.lambda.functor.Cartesian;
 import com.jnape.palatable.lambda.functor.builtin.Lazy;
 import com.jnape.palatable.lambda.monad.Monad;
@@ -19,9 +20,26 @@ import static com.jnape.palatable.lambda.monad.transformer.builtin.ReaderT.reade
 
 public interface ParserT<M extends MonadRec<?, M>, A, F, B> extends
         MonadRec<B, ParserT<M, A, F, ?>>,
+        Bifunctor<F, B, ParserT<M, A, ?, ?>>,
         Cartesian<A, B, ParserT<M, ?, F, ?>> {
 
     ReaderT<A, EitherT<M, F, ?>, B> runParserT();
+
+    @Override
+    default <F2, C> ParserT<M, A, F2, C> biMap(Fn1<? super F, ? extends F2> lFn,
+                                               Fn1<? super B, ? extends C> rFn) {
+        return () -> runParserT().mapReaderT((EitherT<M, F, B> eitherT) -> eitherT.biMap(lFn, rFn));
+    }
+
+    @Override
+    default <F2> ParserT<M, A, F2, B> biMapL(Fn1<? super F, ? extends F2> fn) {
+        return (ParserT<M, A, F2, B>) Bifunctor.super.<F2>biMapL(fn);
+    }
+
+    @Override
+    default <C> ParserT<M, A, F, C> biMapR(Fn1<? super B, ? extends C> fn) {
+        return (ParserT<M, A, F, C>) Bifunctor.super.<C>biMapR(fn);
+    }
 
     @Override
     default <C> ParserT<M, Tuple2<C, A>, F, Tuple2<C, B>> cartesian() {
