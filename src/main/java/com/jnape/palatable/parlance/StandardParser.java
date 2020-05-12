@@ -12,13 +12,13 @@ import com.jnape.palatable.lambda.monad.Monad;
 import com.jnape.palatable.lambda.monad.MonadRec;
 import com.jnape.palatable.lambda.monad.transformer.builtin.EitherT;
 
-public interface StandardParser<A, B> extends Parser<A, Failures, B> {
+public interface StandardParser<A, B> extends Parser<A, Failures, B>, StandardParserT<Identity<?>, A, B> {
 
     @Override
     Either<Failures, B> parse(A a);
 
     default StandardParser<A, B> or(ParserT<Identity<?>, A, Failures, B> other) {
-        return or(other, (x, y) -> Failures.nested("Expected one of the following to pass", x.append(y)));
+        return standardParser(StandardParserT.super.or(other));
     }
 
     @Override
